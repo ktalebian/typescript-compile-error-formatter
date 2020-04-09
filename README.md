@@ -1,6 +1,3 @@
-# typescript-compile-error-formatter
-A error formatter for typescript compile errors, taking from create-react-app
-
 <h1 align="center">@k88/typescript-compile-error-formatter</h1>
 <p align="center">A error formatter for typescript compile errors, taken from <a href="hhttps://github.com/facebook/create-react-app/blob/master/packages/react-dev-utils/typescriptFormatter.js" target="_blank">react-dev-utils</a>, but is published as a standalone module and has Typescript definition.</p>
 
