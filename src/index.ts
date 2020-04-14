@@ -6,24 +6,27 @@ import { codeFrameColumns } from '@babel/code-frame';
 
 interface MessageFunctional {
   getType: () => string;
-  getSeverity: () => string;
+  getSeverity: () => Severity;
   getFile: () => string;
-  getLine: () => string;
+  getLine: () => number;
   getContent: () => string;
   getCode: () => string;
-  getCharacter: () => string;
-  isWarningSeverity: () => boolean;
+  getCharacter: () => number;
+}
+
+export enum Severity {
+  Warning = 'Warning',
+  Error = 'Error',
 }
 
 export interface Message {
   type: string;
-  severity: string;
+  severity: Severity;
   file: string;
-  line: string;
+  line: number;
   content: string;
   code: string;
-  character: string;
-  isWarningSeverity: () => boolean;
+  character: number;
 }
 
 const decomposeMessage = (message: Message | MessageFunctional): Message => {
@@ -36,7 +39,6 @@ const decomposeMessage = (message: Message | MessageFunctional): Message => {
       content: message.getContent(),
       code: message.getCode(),
       character: message.getCharacter(),
-      isWarningSeverity: message.isWarningSeverity,
     };
   }
 
@@ -46,9 +48,10 @@ const decomposeMessage = (message: Message | MessageFunctional): Message => {
 const types = { diagnostic: 'TypeScript', lint: 'TSLint' };
 
 export default (message: Message | MessageFunctional, useColors = true) => {
-  const { type, severity, file, line, content, code, character, isWarningSeverity } = decomposeMessage(message);
+  const { type, severity, file, line, content, code, character } = decomposeMessage(message);
+  const isWarning = severity === Severity.Warning;
 
-  const messageColor = isWarningSeverity() ? chalk.yellow : chalk.red;
+  const messageColor = isWarning ? chalk.yellow : chalk.red;
   const fileAndNumberColor = chalk.bold.cyan;
 
   const source = file && fs.existsSync(file) && fs.readFileSync(file, 'utf-8');
