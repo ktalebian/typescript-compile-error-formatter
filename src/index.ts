@@ -1,55 +1,53 @@
 import os from 'os';
 import fs from 'fs';
 
+import { IssueOrigin } from 'fork-ts-checker-webpack-plugin/lib/issue/IssueOrigin';
+import { IssueSeverity } from 'fork-ts-checker-webpack-plugin/lib/issue/IssueSeverity';
+import { Issue } from 'fork-ts-checker-webpack-plugin/lib/issue';
 import chalk from 'chalk';
 import { codeFrameColumns } from '@babel/code-frame';
 
-interface MessageFunctional {
-  getType: () => string;
-  getSeverity: () => Severity;
-  getFile: () => string;
-  getLine: () => number;
-  getContent: () => string;
+export { IssueOrigin as Origin };
+export { IssueSeverity as Severity };
+export { Issue };
+
+interface IssueFunctional {
+  getOrigin: () => IssueOrigin;
+  getSeverity: () => IssueSeverity;
   getCode: () => string;
-  getCharacter: () => number;
+  getMessage: () => string;
+  getFile?: () => string;
+  getLine?: () => number;
+  getCharacter?: () => number;
+  getStack?: () => string;
 }
 
-export enum Severity {
-  Warning = 'Warning',
-  Error = 'Error',
-}
-
-export interface Message {
-  type: string;
-  severity: Severity;
-  file: string;
-  line: number;
-  content: string;
-  code: string;
-  character: number;
-}
-
-const decomposeMessage = (message: Message | MessageFunctional): Message => {
-  if ('getFile' in message && typeof message.getFile === 'function') {
+const decomposeIssue = (issue: Issue | IssueFunctional): Issue => {
+  if ('getOrigin' in issue && typeof issue.getOrigin === 'function') {
     return {
-      type: message.getFile(),
-      severity: message.getSeverity(),
-      file: message.getFile(),
-      line: message.getLine(),
-      content: message.getContent(),
-      code: message.getCode(),
-      character: message.getCharacter(),
+      origin: issue.getOrigin(),
+      severity: issue.getSeverity(),
+      code: issue.getCode(),
+      message: issue.getMessage(),
+      file: issue.getFile && issue.getFile(),
+      line: issue.getLine && issue.getLine(),
+      character: issue.getCharacter && issue.getCharacter(),
+      stack: issue.getStack && issue.getStack(),
     };
   }
 
-  return message as Message;
+  return issue as Issue;
 };
 
-const types = { diagnostic: 'TypeScript', lint: 'TSLint' };
+const types = {
+  typescript: 'TypeScript',
+  lint: 'Lint',
+  internal: 'Internal',
+};
 
-export default (message: Message | MessageFunctional, useColors = true) => {
-  const { type, severity, file, line, content, code, character } = decomposeMessage(message);
-  const isWarning = severity === Severity.Warning;
+export default (issue: Issue | IssueFunctional, useColors = true) => {
+  const { origin, severity, file, line, message, code, character } = decomposeIssue(issue);
+  const isWarning = severity === IssueSeverity.WARNING;
 
   const messageColor = isWarning ? chalk.yellow : chalk.red;
   const fileAndNumberColor = chalk.bold.cyan;
@@ -63,10 +61,10 @@ export default (message: Message | MessageFunctional, useColors = true) => {
     : '';
 
   return [
-    messageColor.bold(`${types[type]} ${severity.toLowerCase()} in `) +
+    messageColor.bold(`${types[origin]} ${severity.toLowerCase()} in `) +
       fileAndNumberColor(`${file}(${line},${character})`) +
       messageColor(':'),
-    `${content}  ${messageColor.underline((type === 'lint' ? 'Rule: ' : 'TS') + code)}`,
+    `${message}  ${messageColor.underline((origin === IssueOrigin.ESLINT ? 'Rule: ' : 'TS') + code)}`,
     '',
     frame,
   ].join(os.EOL);

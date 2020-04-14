@@ -18,13 +18,11 @@
 
 ## Installation
 
-Install using
+This formatter best works with the output of [fork-ts-checker-webpack-plugin](https://www.npmjs.com/package/fork-ts-checker-webpack-plugin) and is used as a peer dependency. Install both using:
 
 ```bash
-npm install @k88/typescript-compile-error-formatter
+npm install @k88/typescript-compile-error-formatter fork-ts-checker-webpack-plugin --save-dev
 ```
-
-This formatter best works with the output of [fork-ts-checker-webpack-plugin](https://www.npmjs.com/package/fork-ts-checker-webpack-plugin).
 
 ## Usage
 
