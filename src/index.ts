@@ -4,6 +4,7 @@ import fs from 'fs';
 import { IssueOrigin } from 'fork-ts-checker-webpack-plugin/lib/issue/IssueOrigin';
 import { IssueSeverity } from 'fork-ts-checker-webpack-plugin/lib/issue/IssueSeverity';
 import { Issue } from 'fork-ts-checker-webpack-plugin/lib/issue';
+import { Formatter } from 'fork-ts-checker-webpack-plugin/lib/formatter';
 import chalk from 'chalk';
 import { codeFrameColumns } from '@babel/code-frame';
 
@@ -45,7 +46,7 @@ const types = {
   internal: 'Internal',
 };
 
-export default (issue: Issue | IssueFunctional, useColors = true) => {
+const formatter: Formatter = (issue, useColors = true) => {
   const { origin, severity, file, line, message, code, character } = decomposeIssue(issue);
   const isWarning = severity === IssueSeverity.WARNING;
 
@@ -69,3 +70,5 @@ export default (issue: Issue | IssueFunctional, useColors = true) => {
     frame,
   ].join(os.EOL);
 };
+
+export default formatter;
