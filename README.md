@@ -1,5 +1,5 @@
 <h1 align="center">@k88/typescript-compile-error-formatter</h1>
-<p align="center">A error formatter for typescript compile errors, taken from <a href="hhttps://github.com/facebook/create-react-app/blob/master/packages/react-dev-utils/typescriptFormatter.js" target="_blank">react-dev-utils</a>, but is published as a standalone module and has Typescript definition.</p>
+<p align="center">A error formatter for typescript compile errors, taken from <a href="https://github.com/facebook/create-react-app/blob/master/packages/react-dev-utils/typescriptFormatter.js" target="_blank">react-dev-utils</a>, but is published as a standalone module and has Typescript definition.</p>
 
 <p align="center">
     <a href="https://www.npmjs.com/package/@k88/typescript-compile-error-formatter">

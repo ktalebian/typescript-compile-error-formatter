@@ -1,27 +1,32 @@
 import os from 'os';
 import fs from 'fs';
 
-import { IssueOrigin } from 'fork-ts-checker-webpack-plugin/lib/issue/IssueOrigin';
-import { IssueSeverity } from 'fork-ts-checker-webpack-plugin/lib/issue/IssueSeverity';
-import { Issue } from 'fork-ts-checker-webpack-plugin/lib/issue';
+import { Issue, IssueLocation, IssueSeverity } from 'fork-ts-checker-webpack-plugin/lib/issue';
 import { Formatter } from 'fork-ts-checker-webpack-plugin/lib/formatter';
 import chalk from 'chalk';
 import { codeFrameColumns } from '@babel/code-frame';
 
-export { IssueOrigin as Origin };
-export { IssueSeverity as Severity };
 export { Issue };
 
 interface IssueFunctional {
-  getOrigin: () => IssueOrigin;
+  getOrigin: () => string;
   getSeverity: () => IssueSeverity;
   getCode: () => string;
   getMessage: () => string;
   getFile?: () => string;
   getLine?: () => number;
-  getCharacter?: () => number;
-  getStack?: () => string;
+  getLocation?: () => IssueLocation;
 }
+
+const IssueOrigin = {
+  TYPESCRIPT: 'typescript',
+  ESLINT: 'eslint',
+  INTERNAL: 'internal',
+} as const;
+const IssueSeverity = {
+  ERROR: 'error',
+  WARNING: 'warning',
+} as const;
 
 const decomposeIssue = (issue: Issue | IssueFunctional): Issue => {
   if ('getOrigin' in issue && typeof issue.getOrigin === 'function') {
@@ -31,9 +36,7 @@ const decomposeIssue = (issue: Issue | IssueFunctional): Issue => {
       code: issue.getCode(),
       message: issue.getMessage(),
       file: issue.getFile && issue.getFile(),
-      line: issue.getLine && issue.getLine(),
-      character: issue.getCharacter && issue.getCharacter(),
-      stack: issue.getStack && issue.getStack(),
+      location: issue.getLocation && issue.getLocation(),
     };
   }
 
@@ -47,15 +50,16 @@ const types = {
 };
 
 const formatter: Formatter = (issue, useColors = true) => {
-  const { origin, severity, file, line, message, code, character } = decomposeIssue(issue);
+  const { origin, severity, file, location, message, code } = decomposeIssue(issue);
   const isWarning = severity === IssueSeverity.WARNING;
+  const { line, column } = location.start;
 
   const messageColor = isWarning ? chalk.yellow : chalk.red;
   const fileAndNumberColor = chalk.bold.cyan;
 
   const source = file && fs.existsSync(file) && fs.readFileSync(file, 'utf-8');
   const frame = source
-    ? codeFrameColumns(source, { start: { line, column: character } }, { highlightCode: useColors })
+    ? codeFrameColumns(source, { start: { line, column } }, { highlightCode: useColors })
         .split('\n')
         .map((str) => `  ${str}`)
         .join(os.EOL)
@@ -63,7 +67,7 @@ const formatter: Formatter = (issue, useColors = true) => {
 
   return [
     messageColor.bold(`${types[origin]} ${severity.toLowerCase()} in `) +
-      fileAndNumberColor(`${file}(${line},${character})`) +
+      fileAndNumberColor(`${file}(${line},${column})`) +
       messageColor(':'),
     `${message}  ${messageColor.underline((origin === IssueOrigin.ESLINT ? 'Rule: ' : 'TS') + code)}`,
     '',
