@@ -1,6 +1,6 @@
 {
   "name": "@k88/typescript-compile-error-formatter",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "description": "Formats Typescript error messages from Fork TS Checker Webpack Plugin",
   "keywords": [
     "fork-ts-checker-webpack-plugin",
